@@ -4,6 +4,8 @@ Small Node.js CLI for archiving individual WordPress posts to PDF with Playwrigh
 
 The tool loads each post URL in a real browser, extracts the main post content and comments, removes common site chrome, expands linked gallery thumbnails to their full-size image when possible, injects a print stylesheet, and saves one PDF per post.
 
+The repo also includes a companion CLI that discovers WordPress post URLs from a root URL.
+
 ## Requirements
 
 - Node.js 18+
@@ -22,6 +24,41 @@ npm install
 ```
 
 ## Usage
+
+### Discover post URLs
+
+Print discovered post URLs, one per line:
+
+```bash
+npx wp-post-url-scraper https://blog.streetpoet.org/
+```
+
+Print discovered post URLs as JSON:
+
+```bash
+npx wp-post-url-scraper --format json https://blog.streetpoet.org/
+```
+
+Force a specific discovery method:
+
+```bash
+npx wp-post-url-scraper --source sitemap https://blog.streetpoet.org/
+```
+
+Pipe discovered URLs into the PDF archiver:
+
+```bash
+npx wp-post-url-scraper https://blog.streetpoet.org/ | \
+  xargs npx wp-pdf-archiver --output-dir ./pdfs
+```
+
+You can also run discovery through the package script:
+
+```bash
+npm run discover -- https://blog.streetpoet.org/
+```
+
+### Archive post URLs
 
 Archive one post into the current directory:
 
@@ -86,3 +123,4 @@ When the post contains an image thumbnail wrapped in a link to a full-size image
 - WordPress themes vary, so selector heuristics are intentionally simple and inspectable.
 - If a site uses unusual markup, update [`bin/wp-pdf-archiver.js`](/Users/peter/Documents/src/wp-pdf-archiver/bin/wp-pdf-archiver.js) selectors or override the CSS in [`styles/print.css`](/Users/peter/Documents/src/wp-pdf-archiver/styles/print.css).
 - The generated filename is based on the detected post title.
+- The URL scraper tries WordPress sitemaps first, then the REST posts endpoint, then the feed, then a light same-origin archive crawl.

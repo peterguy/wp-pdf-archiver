@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "description": "Archive individual WordPress posts to PDF with Playwright.",
   "bin": {
-    "wp-pdf-archiver": "./bin/wp-pdf-archiver.js"
+    "wp-pdf-archiver": "./bin/wp-pdf-archiver.js",
+    "wp-post-url-scraper": "./bin/wp-post-url-scraper.js"
   },
   "scripts": {
     "archive": "node ./bin/wp-pdf-archiver.js",
-    "test": "node --check ./bin/wp-pdf-archiver.js"
+    "discover": "node ./bin/wp-post-url-scraper.js",
+    "test": "node --check ./bin/wp-pdf-archiver.js && node --check ./bin/wp-post-url-scraper.js"
   },
   "keywords": [
     "wordpress",
