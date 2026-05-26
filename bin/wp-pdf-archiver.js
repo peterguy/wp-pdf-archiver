@@ -448,6 +448,27 @@ async function archivePost(page, url, options) {
       return match ? match[1].trim() : "";
     }
 
+    function toSortableDate(dateValue) {
+      if (!dateValue) {
+        return "";
+      }
+
+      const normalized = String(dateValue)
+        .replace(/(\d+)(st|nd|rd|th)\b/gi, "$1")
+        .replace(/\bat\b/gi, "")
+        .replace(/\s+/g, " ")
+        .trim();
+      const parsed = new Date(normalized);
+      if (Number.isNaN(parsed.getTime())) {
+        return "";
+      }
+
+      const year = parsed.getFullYear();
+      const month = String(parsed.getMonth() + 1).padStart(2, "0");
+      const day = String(parsed.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
     const articleRoot = extractArticleRoot();
     const contentRoot = firstMatch(CONTENT_SELECTORS, articleRoot) || articleRoot;
     const commentsRoot = firstMatch(COMMENTS_SELECTORS, document);
@@ -457,6 +478,7 @@ async function archivePost(page, url, options) {
     const title = (titleNode?.textContent || document.title || sourceUrl).trim();
     const dateText = (dateNode?.textContent || extractLegacyMetaDate(articleRoot) || "").trim();
     const dateHtml = dateNode ? dateNode.outerHTML : "";
+    const dateSlug = toSortableDate(dateNode?.getAttribute("datetime") || dateText);
 
     const contentClone = cloneNode(contentRoot);
     const commentsClone = cloneNode(commentsRoot);
@@ -519,6 +541,7 @@ async function archivePost(page, url, options) {
     return {
       title,
       dateText,
+      dateSlug,
       sourceUrl: absoluteUrl,
     };
   }, { sourceUrl: url });
@@ -544,7 +567,7 @@ async function archivePost(page, url, options) {
 
   const outputFile = path.join(
     options.outputDir,
-    `${buildFileName(metadata.title, metadata.sourceUrl)}.pdf`
+    `${buildFileName(metadata.title, metadata.sourceUrl, metadata.dateSlug)}.pdf`
   );
 
   await page.pdf({
@@ -593,7 +616,7 @@ async function archiveUrls(urls, options = {}) {
   }
 }
 
-function buildFileName(title, sourceUrl) {
+function buildFileName(title, sourceUrl, dateSlug = "") {
   const url = new URL(sourceUrl);
   const slugSource = title || url.pathname.split("/").filter(Boolean).pop() || url.hostname;
   const slug = slugSource
@@ -603,7 +626,8 @@ function buildFileName(title, sourceUrl) {
     .replace(/^-+|-+$/g, "")
     .slice(0, 100);
 
-  return slug || "wordpress-post";
+  const baseName = slug || "wordpress-post";
+  return dateSlug ? `${dateSlug} - ${baseName}` : baseName;
 }
 
 module.exports = {
