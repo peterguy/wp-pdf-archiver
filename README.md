@@ -58,6 +58,32 @@ You can also run discovery through the package script:
 npm run discover -- https://blog.streetpoet.org/
 ```
 
+### Discover and archive from a root URL
+
+Discover post URLs and archive them in one command:
+
+```bash
+npx wp-root-archiver --output-dir ./pdfs https://blog.streetpoet.org/
+```
+
+Preview the discovered URLs without generating PDFs:
+
+```bash
+npx wp-root-archiver --dry-run https://blog.streetpoet.org/
+```
+
+Archive just the first 10 discovered posts:
+
+```bash
+npx wp-root-archiver --limit 10 --output-dir ./pdfs https://blog.streetpoet.org/
+```
+
+You can also run the combined flow through the package script:
+
+```bash
+npm run archive-root -- --output-dir ./pdfs https://blog.streetpoet.org/
+```
+
 ### Archive post URLs
 
 Archive one post into the current directory:

@@ -14,32 +14,8 @@ async function main() {
   }
 
   const rootUrl = normalizeRootUrl(options.rootUrl);
-  const discoveryOrder = options.source === "auto"
-    ? ["sitemap", "rest", "feed", "crawl"]
-    : [options.source];
-
-  const debug = [];
-
-  for (const source of discoveryOrder) {
-    try {
-      const discovered = await discoverUrls(rootUrl, source, options);
-      if (discovered.length > 0) {
-        const urls = dedupeUrls(discovered).sort();
-        writeOutput(urls, source, options);
-        return;
-      }
-
-      debug.push(`${source}: no URLs found`);
-    } catch (error) {
-      debug.push(`${source}: ${error.message}`);
-    }
-  }
-
-  if (options.verbose && debug.length > 0) {
-    debug.forEach((line) => console.error(line));
-  }
-
-  throw new Error(`No post URLs found for ${rootUrl}`);
+  const result = await discoverPostUrls(rootUrl, options);
+  writeOutput(result.urls, result.source, options);
 }
 
 function parseArgs(argv) {
@@ -161,6 +137,42 @@ async function discoverUrls(rootUrl, source, options) {
   }
 
   throw new Error(`Unsupported source: ${source}`);
+}
+
+async function discoverPostUrls(rootUrl, options = {}) {
+  const normalizedOptions = {
+    source: "auto",
+    includePages: false,
+    verbose: false,
+    ...options,
+  };
+  const normalizedRootUrl = normalizeRootUrl(rootUrl);
+  const discoveryOrder = normalizedOptions.source === "auto"
+    ? ["sitemap", "rest", "feed", "crawl"]
+    : [normalizedOptions.source];
+  const debug = [];
+
+  for (const source of discoveryOrder) {
+    try {
+      const discovered = await discoverUrls(normalizedRootUrl, source, normalizedOptions);
+      if (discovered.length > 0) {
+        return {
+          source,
+          urls: dedupeUrls(discovered).sort(),
+        };
+      }
+
+      debug.push(`${source}: no URLs found`);
+    } catch (error) {
+      debug.push(`${source}: ${error.message}`);
+    }
+  }
+
+  if (normalizedOptions.verbose && debug.length > 0) {
+    debug.forEach((line) => console.error(line));
+  }
+
+  throw new Error(`No post URLs found for ${normalizedRootUrl}`);
 }
 
 async function discoverFromSitemap(rootUrl, options) {
@@ -426,7 +438,15 @@ function writeOutput(urls, source, options) {
   process.stdout.write(`${urls.join("\n")}\n`);
 }
 
-main().catch((error) => {
-  console.error(error.message);
-  process.exitCode = 1;
-});
+module.exports = {
+  discoverPostUrls,
+  normalizeRootUrl,
+  parseArgs,
+};
+
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error.message);
+    process.exitCode = 1;
+  });
+}

@@ -21,26 +21,7 @@ async function main() {
     return;
   }
 
-  ensureDirectory(options.outputDir);
-
-  const browser = await chromium.launch({ headless: true });
-
-  try {
-    for (const url of options.urls) {
-      const page = await browser.newPage({
-        viewport: { width: 1440, height: 2200 },
-      });
-
-      try {
-        page.setDefaultTimeout(options.timeoutMs);
-        await archivePost(page, url, options);
-      } finally {
-        await page.close();
-      }
-    }
-  } finally {
-    await browser.close();
-  }
+  await archiveUrls(options.urls, options);
 }
 
 function parseArgs(argv) {
@@ -582,6 +563,36 @@ async function archivePost(page, url, options) {
   console.log(`Saved ${outputFile}`);
 }
 
+async function archiveUrls(urls, options = {}) {
+  const normalizedOptions = {
+    outputDir: DEFAULT_OUTPUT_DIR,
+    cssPath: DEFAULT_PRINT_CSS,
+    timeoutMs: DEFAULT_TIMEOUT_MS,
+    ...options,
+  };
+
+  ensureDirectory(normalizedOptions.outputDir);
+
+  const browser = await chromium.launch({ headless: true });
+
+  try {
+    for (const url of urls) {
+      const page = await browser.newPage({
+        viewport: { width: 1440, height: 2200 },
+      });
+
+      try {
+        page.setDefaultTimeout(normalizedOptions.timeoutMs);
+        await archivePost(page, url, normalizedOptions);
+      } finally {
+        await page.close();
+      }
+    }
+  } finally {
+    await browser.close();
+  }
+}
+
 function buildFileName(title, sourceUrl) {
   const url = new URL(sourceUrl);
   const slugSource = title || url.pathname.split("/").filter(Boolean).pop() || url.hostname;
@@ -595,7 +606,15 @@ function buildFileName(title, sourceUrl) {
   return slug || "wordpress-post";
 }
 
-main().catch((error) => {
-  console.error(error.message);
-  process.exitCode = 1;
-});
+module.exports = {
+  archiveUrls,
+  buildFileName,
+  parseArgs,
+};
+
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error.message);
+    process.exitCode = 1;
+  });
+}
