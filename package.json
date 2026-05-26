@@ -1,0 +1,25 @@
+{
+  "name": "wp-pdf-archiver",
+  "version": "1.0.0",
+  "description": "Archive individual WordPress posts to PDF with Playwright.",
+  "bin": {
+    "wp-pdf-archiver": "./bin/wp-pdf-archiver.js"
+  },
+  "scripts": {
+    "archive": "node ./bin/wp-pdf-archiver.js",
+    "test": "node --check ./bin/wp-pdf-archiver.js"
+  },
+  "keywords": [
+    "wordpress",
+    "pdf",
+    "playwright",
+    "archiver",
+    "cli"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "playwright": "^1.60.0"
+  }
+}
