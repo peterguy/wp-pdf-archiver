@@ -172,9 +172,9 @@ Options:
   -h, --help                              Show this help message
 
 Examples:
-  wp-root-archiver -o ./pdfs https://blog.streetpoet.org/
-  wp-root-archiver --limit 10 https://blog.streetpoet.org/
-  wp-root-archiver --dry-run https://blog.streetpoet.org/
+  wp-root-archiver -o ./pdfs https://your.wordpress.blog/
+  wp-root-archiver --limit 10 https://your.wordpress.blog/
+  wp-root-archiver --dry-run https://your.wordpress.blog/
 `.trim());
 
   process.exitCode = exitCode;

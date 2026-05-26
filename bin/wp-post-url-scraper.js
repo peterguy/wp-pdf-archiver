@@ -104,9 +104,9 @@ Options:
   -h, --help                               Show this help message
 
 Examples:
-  wp-post-url-scraper https://blog.streetpoet.org/
-  wp-post-url-scraper --format json https://blog.streetpoet.org/
-  wp-post-url-scraper --source rest https://blog.streetpoet.org/
+  wp-post-url-scraper https://your.wordpress.blog/
+  wp-post-url-scraper --format json https://your.wordpress.blog/
+  wp-post-url-scraper --source rest https://your.wordpress.blog/
 `.trim());
 
   process.exitCode = exitCode;
